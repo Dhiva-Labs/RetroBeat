@@ -1,0 +1,21 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # An unused import or variable is usually a leftover from a half-finished
+    # edit, so surface it as an error rather than something easy to scroll past.
+    unused_import: error
+    unused_local_variable: error
+    unused_element: error
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - require_trailing_commas
+    - unnecessary_parenthesis
+    - use_super_parameters
+    - avoid_print
+    # Deliberately NOT enabling avoid_redundant_argument_values: it strips
+    # colours from the ColorScheme that happen to equal a Material default,
+    # which would leave the theme silently following Flutter's defaults instead
+    # of stating its own.

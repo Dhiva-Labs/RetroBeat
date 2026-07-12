@@ -1,0 +1,50 @@
+name: retro_beat
+description: A local music player for Android, in the style of Samsung Music.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Playback. audio_service puts it in a foreground service so it survives
+  # backgrounding and drives the lockscreen / headset controls; just_audio's
+  # AudioPipeline carries the equalizer.
+  just_audio: ^0.9.40
+  audio_service: ^0.18.15
+  rxdart: ^0.28.0
+
+  # Reads the device's music library out of MediaStore.
+  on_audio_query: ^2.9.0
+
+  # State
+  flutter_riverpod: ^2.6.1
+
+  # Local storage: the cached library, playlists, groups and EQ presets.
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  uuid: ^4.5.1
+
+  # UI
+  google_fonts: ^6.2.1
+  # Samples a colour from cover art to tint the player background.
+  palette_generator: ^0.3.3+4
+
+  # Permissions. device_info_plus supplies the real Android API level, which
+  # decides whether audio access is READ_MEDIA_AUDIO (33+) or
+  # READ_EXTERNAL_STORAGE.
+  permission_handler: ^11.3.1
+  device_info_plus: ^11.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
