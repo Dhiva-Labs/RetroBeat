@@ -23,7 +23,9 @@ if (hasReleaseKeystore) {
 android {
     namespace = "com.retrobeat.retrobeat"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // Pinned to the installed NDK so release symbol stripping works; the
+    // Flutter-computed default doesn't match what's on this machine.
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
