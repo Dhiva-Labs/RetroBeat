@@ -99,12 +99,11 @@ full explanation.
 |---|---|---|
 | Listing icon | `store/icon-512.png` | 512 × 512 |
 | Feature graphic | `store/feature-graphic-1024x500.png` | 1024 × 500 |
-| Screenshot — Library | `docs/screenshots/library.png` | 1280 × 2856 |
-| Screenshot — Player | `docs/screenshots/player.png` | 1280 × 2856 |
-| Screenshot — Equalizer | `docs/screenshots/equalizer.png` | 1280 × 2856 |
-| Screenshot — Retro mode | `docs/screenshots/retro.png` | 1280 × 2856 |
+| Screenshot — Library | `store/screenshots/library.png` | 1280 × 2560 |
+| Screenshot — Player | `store/screenshots/player.png` | 1280 × 2560 |
+| Screenshot — Equalizer | `store/screenshots/equalizer.png` | 1280 × 2560 |
+| Screenshot — Retro mode | `store/screenshots/retro.png` | 1280 × 2560 |
 
-All four screenshots are 1280 × 2856, a 2.23:1 aspect ratio. That is within
-Play's 320–3840 px per-side range but over its 2:1 max-aspect-ratio limit for
-phone screenshots, so the Play Console may reject them as-is — crop or pad
-before upload if it does.
+The `store/screenshots/` images are 2:1 center-crops of the full-height
+originals in `docs/screenshots/` (which stay untouched there for the README),
+cropped because Play's phone-screenshot limit is 2:1.
