@@ -1,6 +1,6 @@
 # RetroBeat
 
-[![CI](https://github.com/Dhiva-Labs/retro_beat/actions/workflows/ci.yml/badge.svg)](https://github.com/Dhiva-Labs/retro_beat/actions/workflows/ci.yml)
+[![CI](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/ci.yml/badge.svg)](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-3.44-blue?logo=flutter)](https://flutter.dev)
 
