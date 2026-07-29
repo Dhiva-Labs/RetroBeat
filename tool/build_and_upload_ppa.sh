@@ -18,7 +18,7 @@ for arg in "$@"; do [[ "$arg" == "--no-rebuild" ]] && REBUILD=0; done
 
 VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //;s/+.*//')
 GPG_KEY=3D8D857AAF4D50E6
-PPA=ppa:dhivalabs/retrobeat
+PPA=dhiva-apps   # dput stanza in ~/.dput.cf → ppa:dhiva-labs/apps
 
 echo "==> RetroBeat $VERSION — PPA build"
 
@@ -52,4 +52,4 @@ CHANGES="$WORKDIR/retrobeat_${VERSION}_source.changes"
 echo "==> Uploading to $PPA"
 dput "$PPA" "$CHANGES"
 
-echo "==> Done. Monitor build at: https://launchpad.net/~dhivalabs/+archive/ubuntu/retrobeat/+packages"
+echo "==> Done. Monitor build at: https://launchpad.net/~dhiva-labs/+archive/ubuntu/apps/+packages"
