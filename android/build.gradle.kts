@@ -15,15 +15,16 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
-subprojects {
-    project.evaluationDependsOn(":app")
-}
 
-// Some older Flutter plugins bundle their own AGP 4.x buildscript block.
-// When AGP 4.x evaluates the android {} DSL first it silently drops the
-// namespace property, leaving AGP 8.x with nothing to read. Read the
-// namespace from the plugin's own AndroidManifest.xml as a fallback so the
-// build doesn't fail.
+// Register the namespace fallback BEFORE evaluationDependsOn triggers :app's
+// evaluation, which causes Flutter's plugin loader to include and evaluate the
+// plugin subprojects. If this block came after evaluationDependsOn the hooks
+// would arrive too late ("project already evaluated" error).
+//
+// Some older Flutter plugins bundle their own AGP 4.x buildscript block. The
+// old AGP evaluates the android {} DSL first and silently discards the namespace
+// property, leaving AGP 8.x with nothing. Reading the manifest's package
+// attribute here provides a fallback so the build doesn't fail.
 subprojects {
     afterEvaluate {
         extensions.findByName("android")
@@ -40,6 +41,10 @@ subprojects {
                 }
             }
     }
+}
+
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register<Delete>("clean") {
