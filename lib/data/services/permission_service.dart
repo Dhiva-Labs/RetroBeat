@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../core/utils/platform_info.dart';
 
 /// The outcome of asking for access to the user's audio library.
 ///
@@ -10,6 +10,11 @@ import 'package:permission_handler/permission_handler.dart';
 enum MediaPermissionStatus { granted, denied, permanentlyDenied }
 
 /// Runtime permissions for reading the user's audio library.
+///
+/// Desktop has no such permission — the library is whatever folders the user
+/// explicitly picks — so every entry point below returns granted immediately
+/// on Linux/Windows/macOS without ever touching permission_handler or
+/// device_info_plus, both of which are mobile-only concerns.
 class PermissionService {
   static int? _cachedSdkInt;
 
@@ -19,14 +24,14 @@ class PermissionService {
   /// in API 33 and READ_EXTERNAL_STORAGE stopped granting audio access there, so
   /// requesting the wrong one silently yields no access.
   static Future<int> _androidSdkInt() async {
-    if (!Platform.isAndroid) return 0;
+    if (!PlatformInfo.isAndroid) return 0;
     _cachedSdkInt ??= (await DeviceInfoPlugin().androidInfo).version.sdkInt;
     return _cachedSdkInt!;
   }
 
   /// The permission that actually governs audio access on this device.
   static Future<Permission> _audioPermission() async {
-    if (Platform.isIOS) return Permission.mediaLibrary;
+    if (PlatformInfo.isIOS) return Permission.mediaLibrary;
     final sdkInt = await _androidSdkInt();
     return sdkInt >= 33 ? Permission.audio : Permission.storage;
   }
@@ -43,18 +48,14 @@ class PermissionService {
 
   /// Ask for audio library access.
   static Future<MediaPermissionStatus> request() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
-      return MediaPermissionStatus.granted;
-    }
+    if (!PlatformInfo.isMobile) return MediaPermissionStatus.granted;
     final permission = await _audioPermission();
     return _map(await permission.request());
   }
 
   /// Check access without prompting.
   static Future<MediaPermissionStatus> check() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
-      return MediaPermissionStatus.granted;
-    }
+    if (!PlatformInfo.isMobile) return MediaPermissionStatus.granted;
     final permission = await _audioPermission();
     return _map(await permission.status);
   }

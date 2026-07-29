@@ -27,12 +27,23 @@ class SwipeToChangeTrack extends ConsumerStatefulWidget {
 
 class _SwipeToChangeTrackState extends ConsumerState<SwipeToChangeTrack>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 220),
-  );
+  // Built in initState, not as a lazy `late final` initialiser: a swipe that
+  // never happens (open the player, navigate straight back) meant this was
+  // never touched until dispose() read it for the first time there — by then
+  // the element is deactivating, and creating a ticker looks up an ancestor
+  // that is no longer safe to look up, throwing instead of disposing cleanly.
+  late final AnimationController _controller;
 
   double _offset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+  }
 
   @override
   void dispose() {

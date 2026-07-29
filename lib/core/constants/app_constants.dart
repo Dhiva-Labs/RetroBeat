@@ -12,11 +12,28 @@ class AppConstants {
   static const String groupsBox = 'groups_box';
   static const String eqPresetsBox = 'eq_presets_box';
   static const String settingsBox = 'settings_box';
+  // Server *configuration* only. Passwords live in the OS keychain, never in
+  // Hive — see CredentialVault.
+  static const String serversBox = 'servers_box';
 
   // Settings Keys
   static const String activeEqPreset = 'active_eq_preset';
   static const String eqEnabled = 'eq_enabled';
   static const String eqBandGains = 'eq_band_gains';
+
+  // Servers
+  /// Keychain entry prefix; the full key is `<prefix><server id>`. Changing
+  /// this orphans every password already in the OS keychain.
+  static const String serverSecretPrefix = 'retrobeat_server_';
+
+  /// How many transfers may run at once. Two keeps a slow server from
+  /// stalling the queue without saturating a home NAS.
+  static const int maxConcurrentTransfers = 2;
+
+  /// Applies to requests that exchange headers or a small XML body. Uploads
+  /// and downloads are deliberately not capped this way — they are as long as
+  /// the file is.
+  static const Duration webDavRequestTimeout = Duration(seconds: 30);
 
   // Preset curves below are authored as 5 points and resampled onto whatever
   // bands the device's equalizer actually reports. See EqualizerService.

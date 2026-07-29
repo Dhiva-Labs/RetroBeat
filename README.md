@@ -25,16 +25,18 @@ visualisations, because why not.
 
 ## Platform support
 
-Android is the target. iOS builds, but two features are Android-only and the app
-says so rather than showing controls that cannot work.
+Android is the primary target. iOS builds, and Linux/Windows/macOS run as real
+desktop apps rather than a stretched-out afterthought — see [Desktop](#desktop)
+below. A handful of features are Android-only, and the app says so rather than
+showing controls that cannot work.
 
-| | Android | iOS |
-|---|---|---|
-| Library, playback, playlists, groups | ✅ | ✅ |
-| Background / lockscreen / headset controls | ✅ | ✅ (unverified) |
-| Equalizer | ✅ | ❌ — just_audio has no iOS equaliser (`DarwinAudioEffect` is an empty mixin) |
-| Retro mode + visualisations | ✅ | ✅ (procedural only) |
-| Audio-reactive visualiser | ✅ | ❌ — needs `android.media.audiofx.Visualizer` |
+| | Android | iOS | Desktop (Linux/Windows/macOS) |
+|---|---|---|---|
+| Library, playback, playlists, groups | ✅ | ✅ | ✅ — folders you pick, not a system library |
+| Background / lockscreen / headset controls | ✅ | ✅ (unverified) | ❌ — no OS media-session integration wired up yet |
+| Equalizer | ✅ | ❌ — just_audio has no iOS equaliser (`DarwinAudioEffect` is an empty mixin) | ❌ — same reason; entry point is hidden, not shown dead |
+| Retro mode + visualisations | ✅ | ✅ (procedural only) | ✅ (procedural only) |
+| Audio-reactive visualiser | ✅ | ❌ — needs `android.media.audiofx.Visualizer` | ❌ — same API; hidden rather than shown dead |
 
 ## Features
 
@@ -90,6 +92,46 @@ flutter build appbundle --release
 Release builds run R8. **Test a release build on a real device before shipping** —
 shrinker breakage never appears in debug. See [RELEASING.md](RELEASING.md) for
 signing, versioning and the Play Store checklist.
+
+## Desktop
+
+Linux, Windows and macOS run the same UI stretched onto a resizable window,
+backed by a genuinely different library and playback pipeline underneath —
+there is no MediaStore to query outside Android. Instead, Settings → Folders
+(or the button on an empty library) opens a native folder picker, and
+everything found under it is scanned recursively for `.mp3`, `.m4a`, `.aac`,
+`.flac`, `.wav`, `.ogg` and `.opus`, tags and embedded art included.
+
+```bash
+flutter run -d linux     # or windows / macos
+flutter build linux --release
+flutter build windows --release
+flutter build macos --release
+```
+
+**Linux** needs `libmpv` at runtime — playback goes through
+`just_audio_media_kit` over libmpv, and unlike Android there is no bundled
+decoder to fall back on:
+
+```bash
+sudo apt install libmpv2    # Debian/Ubuntu
+sudo dnf install mpv-libs   # Fedora
+sudo pacman -S mpv          # Arch
+```
+
+If your Flutter install is the snap package, its own bundled `clang` is what
+the linker needs at build time, not the system one:
+
+```bash
+CC=/snap/flutter/current/usr/bin/clang \
+CXX=/snap/flutter/current/usr/bin/clang++ \
+flutter build linux --release
+```
+
+Server credentials (for the WebDAV support) go in the OS keychain everywhere —
+Keychain on macOS, DPAPI on Windows, and on Linux whatever
+`flutter_secure_storage` finds via libsecret, typically gnome-keyring or
+kwallet.
 
 ## Architecture
 
@@ -178,11 +220,15 @@ Android gates the audio-waveform API behind it. See [PRIVACY.md](PRIVACY.md).
 - iOS is configured but **has never been compiled or run** — see below
 - Rename to "Harmony" (changes the Android `applicationId`, so an installed copy
   will not upgrade in place)
+- Desktop lockscreen/media-key integration (MPRIS on Linux, SMTC on Windows,
+  Now Playing on macOS) — `audio_service` is mobile-only, so `RetroBeatAudioHandler`
+  runs standalone on desktop and there is no OS media session to plug it into yet
 
 ## Contributing
 
 Issues and pull requests are welcome. CI runs `dart format`, `flutter analyze`
-and `flutter test` on every push, and all three must pass.
+and `flutter test` on every push, and all three must pass. Tagged releases
+(`v*`) and manual runs also build and upload Linux, Windows and macOS bundles.
 
 Two house rules, both learned the hard way in this codebase:
 

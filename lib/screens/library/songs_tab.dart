@@ -1,10 +1,13 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/platform_info.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/song_tile.dart';
 import '../../data/services/permission_service.dart';
 import '../../providers/audio_provider.dart';
+import '../../providers/folders_provider.dart';
 
 /// Every song on the device.
 class SongsTab extends ConsumerWidget {
@@ -118,9 +121,34 @@ class _SongsEmptyState extends ConsumerWidget {
       );
     }
 
+    // No MediaStore here — an empty library means no folder has been picked
+    // yet (or the ones picked have nothing playable), so the way out is
+    // "add a folder", never a permission prompt that does not apply.
+    if (PlatformInfo.isDesktop) {
+      final hasFolders = ref.watch(desktopScanFoldersProvider).isNotEmpty;
+      return EmptyState(
+        icon: Icons.create_new_folder_outlined,
+        message: hasFolders
+            ? 'No music found in the folders you added.'
+            : 'No music yet.\nAdd a folder to build your library.',
+        action: FilledButton.icon(
+          onPressed: () => _addFolder(ref),
+          icon: const Icon(Icons.create_new_folder_outlined),
+          label: const Text('Add folder'),
+        ),
+      );
+    }
+
     return const EmptyState(
       icon: Icons.music_off_rounded,
       message: 'No music found on your device.',
     );
+  }
+
+  Future<void> _addFolder(WidgetRef ref) async {
+    final path = await getDirectoryPath();
+    if (path == null) return;
+    await ref.read(desktopScanFoldersProvider.notifier).addFolder(path);
+    await ref.read(libraryLoaderProvider).load(prompt: false);
   }
 }

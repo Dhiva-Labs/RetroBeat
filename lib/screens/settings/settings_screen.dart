@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/platform_info.dart';
 import '../../data/models/visualizer_style.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/folders_provider.dart';
+import '../../providers/server_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/tabs_provider.dart';
 import '../../providers/visualizer_provider.dart';
 import '../equalizer/equalizer_screen.dart';
+import '../servers/servers_screen.dart';
 import 'folders_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -20,7 +23,9 @@ class SettingsScreen extends ConsumerWidget {
     final isRetro = ref.watch(retroModeProvider);
     final minDurationFilter = ref.watch(minDurationFilterProvider);
     final autoRescan = ref.watch(autoRescanProvider);
-    final excludedCount = ref.watch(excludedFoldersProvider).length;
+    final foldersSubtitle = PlatformInfo.isDesktop
+        ? _desktopFoldersSubtitle(ref.watch(desktopScanFoldersProvider).length)
+        : _excludedFoldersSubtitle(ref.watch(excludedFoldersProvider).length);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -64,28 +69,46 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.folder_off_outlined),
             title: const Text('Folders'),
-            subtitle: Text(
-              excludedCount == 0
-                  ? 'All folders included'
-                  : '$excludedCount folder${excludedCount == 1 ? '' : 's'} excluded',
-            ),
+            subtitle: Text(foldersSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const FoldersScreen()),
             ),
           ),
-          const _SectionHeader('Audio'),
+          const _SectionHeader('Servers'),
           ListTile(
-            leading: const Icon(Icons.tune_rounded),
-            title: const Text('Equalizer'),
-            subtitle: const Text('Presets, or tune each band yourself'),
+            leading: const Icon(Icons.dns_rounded),
+            title: const Text('Servers'),
+            subtitle: Text(
+              _serversSubtitle(
+                ref.watch(serverListProvider).length,
+                ref.watch(connectedSessionsProvider).length,
+              ),
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const EqualizerScreen()),
+              MaterialPageRoute(builder: (_) => const ServersScreen()),
             ),
           ),
+          // AndroidEqualizer is inert everywhere but Android — an entry point
+          // that opens onto "not available here" is still better hidden than
+          // shown, so the whole section goes with it rather than leaving a
+          // header over nothing.
+          if (!PlatformInfo.isDesktop) ...[
+            const _SectionHeader('Audio'),
+            ListTile(
+              leading: const Icon(Icons.tune_rounded),
+              title: const Text('Equalizer'),
+              subtitle: const Text('Presets, or tune each band yourself'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EqualizerScreen()),
+              ),
+            ),
+          ],
           const _SectionHeader('Tabs'),
           const _TabsSetting(),
           const _SectionHeader('Appearance'),
@@ -114,6 +137,23 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _desktopFoldersSubtitle(int count) {
+    return count == 0
+        ? 'Add a folder to build your library'
+        : '$count folder${count == 1 ? '' : 's'} selected';
+  }
+
+  String _excludedFoldersSubtitle(int excludedCount) {
+    return excludedCount == 0
+        ? 'All folders included'
+        : '$excludedCount folder${excludedCount == 1 ? '' : 's'} excluded';
+  }
+
+  String _serversSubtitle(int total, int connected) {
+    if (total == 0) return 'Add a WebDAV server to browse and stream remotely';
+    return '$connected of $total connected';
   }
 }
 

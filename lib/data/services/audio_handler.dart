@@ -2,16 +2,26 @@ import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../core/utils/platform_info.dart';
+
 /// Background playback: media notification, lockscreen and headset controls.
 class RetroBeatAudioHandler extends BaseAudioHandler
     with SeekHandler, QueueHandler {
-  /// Audio effects must exist before the player so they can be installed into
-  /// its pipeline. On non-Android platforms just_audio ignores the Android
-  /// effects list, so this is safe to build unconditionally.
+  /// The bare object is harmless to construct on any platform — the danger is
+  /// installing it into a live pipeline (see `_player` below), so building it
+  /// unconditionally here is fine and keeps [equalizer] non-null everywhere.
   final AndroidEqualizer _equalizer = AndroidEqualizer();
 
+  /// Attached to the pipeline on Android only. just_audio activates every
+  /// effect in the pipeline against whatever platform backend is actually
+  /// live, regardless of which platform that effect targets — so an
+  /// `AndroidEqualizer` in the pipeline on a non-Android backend (media_kit on
+  /// Linux/Windows; likely iOS too) throws `UnimplementedError` out of
+  /// `androidEqualizerGetParameters()` rather than being quietly ignored.
   late final AudioPlayer _player = AudioPlayer(
-    audioPipeline: AudioPipeline(androidAudioEffects: [_equalizer]),
+    audioPipeline: PlatformInfo.isAndroid
+        ? AudioPipeline(androidAudioEffects: [_equalizer])
+        : null,
   );
 
   final ConcatenatingAudioSource _playlist =
@@ -102,7 +112,16 @@ class RetroBeatAudioHandler extends BaseAudioHandler
 
     await _playlist.clear();
     await _playlist.addAll([
-      for (final item in items) AudioSource.uri(Uri.parse(item.id), tag: item),
+      for (final item in items)
+        AudioSource.uri(
+          Uri.parse(item.id),
+          tag: item,
+          // A remote (WebDAV) item carries its auth header here; a local
+          // file has no 'headers' extra, so this stays null and nothing
+          // changes for it. just_audio_media_kit forwards this to mpv's
+          // http-header-fields, so the header survives onto the wire.
+          headers: (item.extras?['headers'] as Map?)?.cast<String, String>(),
+        ),
     ]);
 
     await _player.setAudioSource(

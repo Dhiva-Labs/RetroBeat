@@ -7,6 +7,7 @@ import '../group/groups_screen.dart';
 import '../library/browse_tabs.dart';
 import '../library/songs_tab.dart';
 import '../playlist/playlists_screen.dart';
+import '../servers/widgets/servers_entry_button.dart';
 import '../settings/settings_screen.dart';
 import 'widgets/mini_player.dart';
 
@@ -89,6 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: const Icon(Icons.search_rounded),
                 onPressed: () => setState(() => _isSearching = true),
               ),
+              const ServersEntryButton(),
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
                 onPressed: () => Navigator.push(

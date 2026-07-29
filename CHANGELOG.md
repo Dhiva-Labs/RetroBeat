@@ -4,6 +4,29 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Desktop support: RetroBeat now builds and runs on Linux, Windows and macOS.
+  The library comes from folders you pick (scanned recursively, tags and
+  embedded art read from the files), since MediaStore exists only on Android.
+  CI builds all three desktop bundles on tags and manual dispatch. Linux needs
+  `libmpv` at runtime; see the README's Desktop section.
+- Music servers: add any WebDAV server (Nextcloud, a NAS, rclone/dufs, …),
+  stay logged in to several at once, browse and stream from them, and copy or
+  move files between two servers with live progress. Same-server moves use the
+  WebDAV MOVE verb; cross-server transfers stream through the app without
+  buffering whole files, verify the destination, and only then delete the
+  source of a move.
+- Server passwords live in the OS keyring (GNOME Keyring / KWallet, Windows
+  Credential Manager, macOS Keychain) — never in the app's own storage, and a
+  test guards that the raw database bytes cannot contain them. Plain-`http`
+  servers are allowed for LAN use but wear an "Unencrypted" badge.
+
+### Fixed
+- A dispose-time crash in swipe-to-change-track when a swipe never happened
+  during the widget's life.
+
 ## [1.0.0] - 2026-07-29
 
 ### Changed

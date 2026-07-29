@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/duration_formatter.dart';
+import '../../core/utils/platform_info.dart';
 import '../../core/widgets/artwork.dart';
 import '../../core/widgets/swipe_to_change_track.dart';
 import '../../data/models/song_model.dart';
@@ -159,14 +160,17 @@ class _TopBar extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         const Spacer(),
-        IconButton(
-          tooltip: 'Equalizer',
-          icon: const Icon(Icons.tune_rounded),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EqualizerScreen()),
+        // AndroidEqualizer is inert off-Android; the entry point goes with it
+        // rather than opening onto a screen that can only say so.
+        if (!PlatformInfo.isDesktop)
+          IconButton(
+            tooltip: 'Equalizer',
+            icon: const Icon(Icons.tune_rounded),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const EqualizerScreen()),
+            ),
           ),
-        ),
         IconButton(
           tooltip: 'Queue',
           icon: const Icon(Icons.queue_music_rounded),
@@ -190,6 +194,9 @@ class _TrackInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    // Favoriting needs a library row to persist against; a remote track has
+    // none, so the control is hidden rather than left to tap and do nothing.
+    final isRemote = ref.watch(isRemotePlaybackProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -218,21 +225,23 @@ class _TrackInfo extends ConsumerWidget {
               ],
             ),
           ),
-          IconButton(
-            iconSize: 28,
-            color: song.isFavorite ? scheme.primary : scheme.onSurfaceVariant,
-            icon: Icon(
-              song.isFavorite
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_border_rounded,
+          if (!isRemote)
+            IconButton(
+              iconSize: 28,
+              color: song.isFavorite ? scheme.primary : scheme.onSurfaceVariant,
+              icon: Icon(
+                song.isFavorite
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+              ),
+              onPressed: () async {
+                await ref.read(mediaRepositoryProvider).toggleFavorite(song.id);
+                // Mutated in place, so the list identity must change to
+                // rebuild.
+                ref.read(songsProvider.notifier).state =
+                    List<SongModel>.from(ref.read(songsProvider));
+              },
             ),
-            onPressed: () async {
-              await ref.read(mediaRepositoryProvider).toggleFavorite(song.id);
-              // Mutated in place, so the list identity must change to rebuild.
-              ref.read(songsProvider.notifier).state =
-                  List<SongModel>.from(ref.read(songsProvider));
-            },
-          ),
         ],
       ),
     );

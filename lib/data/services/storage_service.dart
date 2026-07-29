@@ -3,6 +3,7 @@ import '../models/song_model.dart';
 import '../models/playlist_model.dart';
 import '../models/group_model.dart';
 import '../models/eq_preset_model.dart';
+import '../models/server_config_model.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Service to handle Hive database initialization and access
@@ -11,6 +12,10 @@ class StorageService {
   static late Box<PlaylistModel> playlistsBox;
   static late Box<GroupModel> groupsBox;
   static late Box<EqPresetModel> eqPresetsBox;
+
+  /// Server settings only. Passwords go to the OS keychain via
+  /// CredentialVault — a Hive box is an unencrypted file.
+  static late Box<ServerConfigModel> serversBox;
   static late Box settingsBox;
 
   /// Initialize Hive and register adapters
@@ -22,12 +27,14 @@ class StorageService {
     Hive.registerAdapter(PlaylistModelAdapter());
     Hive.registerAdapter(GroupModelAdapter());
     Hive.registerAdapter(EqPresetModelAdapter());
+    Hive.registerAdapter(ServerConfigModelAdapter());
 
     // Open boxes
     songsBox = await Hive.openBox<SongModel>(AppConstants.songsBox);
     playlistsBox = await Hive.openBox<PlaylistModel>(AppConstants.playlistsBox);
     groupsBox = await Hive.openBox<GroupModel>(AppConstants.groupsBox);
     eqPresetsBox = await Hive.openBox<EqPresetModel>(AppConstants.eqPresetsBox);
+    serversBox = await Hive.openBox<ServerConfigModel>(AppConstants.serversBox);
     settingsBox = await Hive.openBox(AppConstants.settingsBox);
 
     // Initialize default EQ presets if empty

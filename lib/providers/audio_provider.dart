@@ -1,10 +1,13 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/utils/platform_info.dart';
+import '../core/utils/stable_id.dart';
 import '../data/models/song_model.dart';
 import '../data/repositories/media_repository.dart';
 import '../data/services/audio_handler.dart';
 import '../data/services/permission_service.dart';
 import 'folders_provider.dart';
+import 'server_providers.dart';
 import 'settings_provider.dart';
 
 /// Provider for the AudioHandler singleton
@@ -42,7 +45,12 @@ final currentSongProvider = Provider<SongModel?>((ref) {
   if (mediaItem == null) return null;
 
   final songId = mediaItem.extras?['songId'] as int?;
-  if (songId == null) return null;
+  if (songId == null) {
+    // A remote (WebDAV) track has no library row to look up — display it
+    // straight from the MediaItem instead of disappearing. See
+    // isRemotePlaybackProvider for the flag this same check drives.
+    return _remoteDisplaySong(mediaItem);
+  }
 
   final songs = ref.watch(songsProvider);
   try {
@@ -51,6 +59,30 @@ final currentSongProvider = Provider<SongModel?>((ref) {
     return null;
   }
 });
+
+/// True while the playing item has no local library id — a remote WebDAV
+/// track, currently. Lets a control that only makes sense against the
+/// library (favoriting, in NowPlayingScreen) hide itself rather than tap and
+/// do nothing.
+final isRemotePlaybackProvider = Provider<bool>((ref) {
+  final mediaItem = ref.watch(currentMediaItemProvider).valueOrNull;
+  return mediaItem != null && mediaItem.extras?['songId'] == null;
+});
+
+/// A display-only stand-in for a [MediaItem] with no library row. Never
+/// written to Hive: the id only has to be stable enough for [Artwork]'s
+/// per-id cache lookup to consistently miss and fall back to the placeholder,
+/// which is exactly what happens since nothing ever caches art under it.
+SongModel _remoteDisplaySong(MediaItem item) {
+  return SongModel(
+    id: stableIdFor(item.id),
+    title: item.title,
+    artist: item.artist ?? 'Unknown Artist',
+    album: item.album ?? 'Unknown Album',
+    uri: item.id,
+    duration: item.duration?.inMilliseconds ?? 0,
+  );
+}
 
 /// Provider for is playing state
 final isPlayingProvider = Provider<bool>((ref) {
@@ -131,15 +163,23 @@ class LibraryLoader {
       _ref.read(songsLoadingProvider.notifier).state = false;
     }
 
-    final scanned = await repo.scanLocalSongs(
-      hideShortAudio: _ref.read(minDurationFilterProvider),
-      excludedFolders: _ref.read(excludedFoldersProvider),
-    );
+    final List<SongModel> scanned;
+    if (PlatformInfo.isDesktop) {
+      scanned = await repo.scanDesktopSongs(
+        folders: _ref.read(desktopScanFoldersProvider),
+        hideShortAudio: _ref.read(minDurationFilterProvider),
+      );
+    } else {
+      scanned = await repo.scanLocalSongs(
+        hideShortAudio: _ref.read(minDurationFilterProvider),
+        excludedFolders: _ref.read(excludedFoldersProvider),
+      );
+      // The Folders screen needs the full folder list refreshed after every
+      // scan, including folders currently excluded.
+      _ref.read(knownFoldersProvider.notifier).state = repo.getKnownFolders();
+    }
     _ref.read(songsProvider.notifier).state = scanned;
     _ref.read(songsLoadingProvider.notifier).state = false;
-    // The Folders screen needs the full folder list refreshed after every
-    // scan, including folders currently excluded.
-    _ref.read(knownFoldersProvider.notifier).state = repo.getKnownFolders();
   }
 }
 
@@ -209,4 +249,43 @@ enum SongSortOrder {
   album,
   dateAdded,
   duration,
+}
+
+// ================== Remote (WebDAV) playback ==================
+
+/// Builds MediaItems for [entries] (already filtered to audio files, in
+/// display order) and starts playback at [index] — the remote counterpart to
+/// [playSongs] in song_tile.dart.
+///
+/// [serverName] and [folderName] become every item's artist/album: WebDAV
+/// exposes no ID3-style tags without downloading the file first, and "which
+/// server, which folder" beats "Unknown Artist" repeated for every track.
+Future<void> playRemoteQueue(
+  WidgetRef ref, {
+  required String serverId,
+  required String serverName,
+  required String folderName,
+  required List<WebDavEntry> entries,
+  required int index,
+}) async {
+  if (entries.isEmpty) return;
+  final sessions = ref.read(serverSessionsProvider.notifier);
+
+  final items = <MediaItem>[];
+  for (final entry in entries) {
+    final spec = await sessions.remoteStreamSpec(serverId, entry.path);
+    items.add(
+      MediaItem(
+        id: spec.url.toString(),
+        title: WebDavClient.basename(entry.path),
+        artist: serverName,
+        album: folderName,
+        extras: {'headers': spec.headers},
+      ),
+    );
+  }
+
+  final handler = ref.read(audioHandlerProvider);
+  await handler.loadPlaylist(items, initialIndex: index);
+  await handler.play();
 }

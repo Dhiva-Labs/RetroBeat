@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../core/utils/platform_info.dart';
 
 /// One frame of analysis: the spectrum and the waveform of the same instant.
 ///
@@ -36,7 +36,7 @@ class VisualizerFrame {
 class VisualizerService {
   static const _channel = EventChannel('retrobeat/visualizer');
 
-  bool get isSupported => Platform.isAndroid;
+  bool get isSupported => PlatformInfo.isAndroid;
 
   /// Ask for the permission the platform API requires.
   ///

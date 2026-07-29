@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.4.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -39,12 +39,38 @@ dependencies:
   permission_handler: ^11.3.1
   device_info_plus: ^11.2.0
 
+  # Desktop (Linux/Windows/macOS). just_audio has no desktop backend of its
+  # own; just_audio_media_kit provides one over libmpv, with the platform lib
+  # packages supplying the bundled libraries. macOS uses just_audio's native
+  # Darwin implementation.
+  just_audio_media_kit: ^2.1.0
+  media_kit_libs_linux: ^1.2.1
+  media_kit_libs_windows_audio: ^1.0.9
+  window_manager: ^0.4.3
+
+  # Desktop library scanning: folder picker plus pure-Dart tag reading, since
+  # MediaStore (on_audio_query) exists only on Android.
+  file_selector: ^1.0.3
+  audio_metadata_reader: ^1.4.0
+  path: ^1.9.0
+
+  # Servers. Credentials go in the OS keychain (Keychain / DPAPI / libsecret),
+  # never in Hive. http + xml carry the WebDAV client (PROPFIND is XML).
+  flutter_secure_storage: ^9.2.4
+  http: ^1.2.2
+  xml: ^6.5.0
+  crypto: ^3.0.6
+
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.13
+  # Local WebDAV server used by tests and `tool/dev_webdav_server.dart`.
+  shelf: ^1.4.2
 
 flutter:
   uses-material-design: true

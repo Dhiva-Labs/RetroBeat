@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:just_audio/just_audio.dart';
+
+import '../../core/utils/platform_info.dart';
 
 /// Applies equalizer settings to the live audio pipeline.
 ///
@@ -18,7 +18,7 @@ class EqualizerService {
 
   AndroidEqualizerParameters? _parameters;
 
-  bool get isSupported => Platform.isAndroid;
+  bool get isSupported => PlatformInfo.isAndroid;
 
   /// Device-reported band parameters, or null if unavailable.
   ///

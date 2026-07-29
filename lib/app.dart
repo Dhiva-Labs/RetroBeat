@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retro_beat/core/constants/app_constants.dart';
 import 'package:retro_beat/core/theme/app_colors.dart';
 import 'package:retro_beat/core/theme/app_theme.dart';
+import 'package:retro_beat/core/utils/platform_info.dart';
 import 'package:retro_beat/data/services/permission_service.dart';
 import 'package:retro_beat/providers/audio_provider.dart';
+import 'package:retro_beat/providers/server_providers.dart';
 import 'package:retro_beat/providers/settings_provider.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -49,6 +53,11 @@ class _RetroBeatAppState extends ConsumerState<RetroBeatApp>
     // Requests access, then loads the library (or records why it could not).
     await ref.read(libraryLoaderProvider).load();
 
+    // Fire-and-forget: an unreachable autoConnect server must not hold up the
+    // splash screen, and connect() already turns every failure into a
+    // per-server session state rather than an exception.
+    unawaited(bootstrapServers(ref));
+
     if (mounted) {
       setState(() => _initialized = true);
     }
@@ -84,16 +93,19 @@ class _RetroBeatAppState extends ConsumerState<RetroBeatApp>
         : (isDarkMode ? AppColors.darkScheme : AppColors.lightScheme);
 
     // The status/nav bar icons have to invert with the theme, or one of the
-    // modes ends up with white icons on a white bar.
-    SystemChrome.setSystemUIOverlayStyle(
-      (scheme.brightness == Brightness.dark
-              ? SystemUiOverlayStyle.light
-              : SystemUiOverlayStyle.dark)
-          .copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: scheme.surface,
-      ),
-    );
+    // modes ends up with white icons on a white bar. Desktop has neither, so
+    // there is nothing for this call to do there.
+    if (PlatformInfo.isMobile) {
+      SystemChrome.setSystemUIOverlayStyle(
+        (scheme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark)
+            .copyWith(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: scheme.surface,
+        ),
+      );
+    }
 
     return MaterialApp(
       title: AppConstants.appName,
