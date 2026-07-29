@@ -1,0 +1,20 @@
+Source: retrobeat
+Section: sound
+Priority: optional
+Maintainer: Dhivakar R (Dhiva-Labs) <dhivakar1010@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/dhivalabs/retro_beat
+Rules-Requires-Root: no
+
+Package: retrobeat
+Architecture: amd64
+Depends: ${misc:Depends}, libgtk-3-0 | libgtk-3-0t64, libsecret-1-0, libepoxy0
+Recommends: libmpv2
+Description: Retro-style music player with WebDAV server support
+ RetroBeat builds a library from local music folders, streams from WebDAV
+ servers (Nextcloud, NAS, rclone/dufs), and brings an optional Windows
+ Media Player retro skin with eight visualisations.
+ .
+ Desktop playback is powered by libmpv. Install the libmpv2 package to
+ enable audio output.

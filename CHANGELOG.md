@@ -4,7 +4,7 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-07-30
 
 ### Added
 - Desktop support: RetroBeat now builds and runs on Linux, Windows and macOS.
@@ -26,6 +26,8 @@ All notable changes to this project are documented here. Format follows
 ### Fixed
 - A dispose-time crash in swipe-to-change-track when a swipe never happened
   during the widget's life.
+- Server browser and settings entry points are now hidden on Android and iOS,
+  where the feature cannot function. Only desktop platforms show them.
 
 ## [1.0.0] - 2026-07-29
 

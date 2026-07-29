@@ -76,22 +76,24 @@ class SettingsScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const FoldersScreen()),
             ),
           ),
-          const _SectionHeader('Servers'),
-          ListTile(
-            leading: const Icon(Icons.dns_rounded),
-            title: const Text('Servers'),
-            subtitle: Text(
-              _serversSubtitle(
-                ref.watch(serverListProvider).length,
-                ref.watch(connectedSessionsProvider).length,
+          if (PlatformInfo.isDesktop) ...[
+            const _SectionHeader('Servers'),
+            ListTile(
+              leading: const Icon(Icons.dns_rounded),
+              title: const Text('Servers'),
+              subtitle: Text(
+                _serversSubtitle(
+                  ref.watch(serverListProvider).length,
+                  ref.watch(connectedSessionsProvider).length,
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ServersScreen()),
               ),
             ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ServersScreen()),
-            ),
-          ),
+          ],
           // AndroidEqualizer is inert everywhere but Android — an entry point
           // that opens onto "not available here" is still better hidden than
           // shown, so the whole section goes with it rather than leaving a

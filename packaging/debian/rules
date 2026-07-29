@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	: # Pre-built Flutter bundle — nothing to compile.
+
+override_dh_auto_install:
+	install -d $(CURDIR)/debian/retrobeat/usr/lib/retrobeat
+	cp -rp $(CURDIR)/bundle/. $(CURDIR)/debian/retrobeat/usr/lib/retrobeat/
+	chmod 755 $(CURDIR)/debian/retrobeat/usr/lib/retrobeat/retro_beat
+	install -d $(CURDIR)/debian/retrobeat/usr/bin
+	ln -sf /usr/lib/retrobeat/retro_beat \
+		$(CURDIR)/debian/retrobeat/usr/bin/retrobeat
+	install -d $(CURDIR)/debian/retrobeat/usr/share/applications
+	install -m 644 $(CURDIR)/debian/retrobeat.desktop \
+		$(CURDIR)/debian/retrobeat/usr/share/applications/retrobeat.desktop
+	install -d $(CURDIR)/debian/retrobeat/usr/share/icons/hicolor/512x512/apps
+	install -m 644 $(CURDIR)/icon.png \
+		$(CURDIR)/debian/retrobeat/usr/share/icons/hicolor/512x512/apps/retrobeat.png
+
+override_dh_strip:
+	: # Stripped at Flutter build time; re-stripping would corrupt the binary.
+
+override_dh_dwz:
+	: # No debug info to compress.

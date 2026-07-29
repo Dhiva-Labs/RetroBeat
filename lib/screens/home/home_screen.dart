@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/platform_info.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/tabs_provider.dart';
 import '../group/groups_screen.dart';
@@ -90,7 +91,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: const Icon(Icons.search_rounded),
                 onPressed: () => setState(() => _isSearching = true),
               ),
-              const ServersEntryButton(),
+              if (PlatformInfo.isDesktop) const ServersEntryButton(),
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
                 onPressed: () => Navigator.push(

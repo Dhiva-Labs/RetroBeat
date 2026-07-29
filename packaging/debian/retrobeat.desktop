@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RetroBeat
+Comment=Retro-style music player with WebDAV server support
+Exec=retrobeat
+Icon=retrobeat
+Type=Application
+Categories=Audio;Music;Player;
+Keywords=music;player;retro;webdav;
+StartupWMClass=retro_beat

@@ -1,0 +1,15 @@
+retrobeat (1.1.0) noble; urgency=medium
+
+  * Desktop support: Linux, Windows and macOS.
+  * Music servers: WebDAV multi-server with live streaming and cross-server
+    file transfer. Passwords stored in OS keyring only.
+  * Fixed swipe-to-change-track dispose crash.
+  * Server UI gated to desktop platforms only.
+
+ -- Dhivakar R (Dhiva-Labs) <dhivakar1010@gmail.com>  Wed, 30 Jul 2026 00:00:00 +0530
+
+retrobeat (1.0.0) noble; urgency=low
+
+  * Initial release.
+
+ -- Dhivakar R (Dhiva-Labs) <dhivakar1010@gmail.com>  Wed, 29 Jul 2026 00:00:00 +0530
