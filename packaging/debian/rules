@@ -20,6 +20,9 @@ override_dh_auto_install:
 	install -m 644 $(CURDIR)/icon.png \
 		$(CURDIR)/debian/retrobeat/usr/share/icons/hicolor/512x512/apps/retrobeat.png
 
+override_dh_shlibdeps:
+	: # Pre-built binary; all runtime deps are listed manually in debian/control.
+
 override_dh_strip:
 	: # Stripped at Flutter build time; re-stripping would corrupt the binary.
 

@@ -17,10 +17,14 @@ REBUILD=1
 for arg in "$@"; do [[ "$arg" == "--no-rebuild" ]] && REBUILD=0; done
 
 VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //;s/+.*//')
+# PPA_SUFFIX lets us re-upload the same upstream version with a fixed package
+# (e.g. +ppa1, +ppa2) without changing the Flutter app version.
+PPA_SUFFIX=${PPA_SUFFIX:-+ppa1}
+PKG_VERSION="${VERSION}${PPA_SUFFIX}"
 GPG_KEY=3D8D857AAF4D50E6
 PPA=dhiva-apps   # dput stanza in ~/.dput.cf → ppa:dhiva-labs/apps
 
-echo "==> RetroBeat $VERSION — PPA build"
+echo "==> RetroBeat $PKG_VERSION — PPA build"
 
 if [[ $REBUILD -eq 1 ]]; then
   echo "==> Building Linux release bundle..."
@@ -33,7 +37,7 @@ BUNDLE=build/linux/x64/release/bundle
 [[ -d "$BUNDLE" ]] || { echo "ERROR: $BUNDLE not found. Run without --no-rebuild."; exit 1; }
 
 WORKDIR=$(mktemp -d)
-PKGDIR="$WORKDIR/retrobeat_${VERSION}"
+PKGDIR="$WORKDIR/retrobeat_${PKG_VERSION}"
 echo "==> Staging in $PKGDIR"
 mkdir -p "$PKGDIR"
 
@@ -48,7 +52,7 @@ chmod +x "$PKGDIR/debian/rules"
 # Build the signed source package
 (cd "$PKGDIR" && debuild -S -sa -k"$GPG_KEY")
 
-CHANGES="$WORKDIR/retrobeat_${VERSION}_source.changes"
+CHANGES="$WORKDIR/retrobeat_${PKG_VERSION}_source.changes"
 echo "==> Uploading to $PPA"
 dput "$PPA" "$CHANGES"
 
