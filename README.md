@@ -3,6 +3,9 @@
 [![CI](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/ci.yml/badge.svg)](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-3.44-blue?logo=flutter)](https://flutter.dev)
+[![ARM64 builds](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/desktop.yml/badge.svg?branch=main)](https://github.com/Dhiva-Labs/RetroBeat/actions/workflows/desktop.yml)
+![Linux x64 | arm64](https://img.shields.io/badge/Linux-x64%20%7C%20arm64-informational?logo=linux&logoColor=white)
+![Windows x64 | arm64](https://img.shields.io/badge/Windows-x64%20%7C%20arm64-informational?logo=windows&logoColor=white)
 
 A local music player for Android, built with Flutter. It reads the music already
 on your device — there is no streaming, no account, and **no network access at
@@ -132,6 +135,32 @@ Server credentials (for the WebDAV support) go in the OS keychain everywhere —
 Keychain on macOS, DPAPI on Windows, and on Linux whatever
 `flutter_secure_storage` finds via libsecret, typically gnome-keyring or
 kwallet.
+
+### Downloads
+
+Releases carry the desktop builds as plain archives:
+
+| Platform | Architecture | Asset |
+|---|---|---|
+| Linux | x64 | `RetroBeat-<version>-linux-x64.tar.gz` |
+| Linux | arm64 | `RetroBeat-<version>-linux-arm64.tar.gz` |
+| Windows | x64 | `RetroBeat-<version>-windows-x64.zip` |
+| Windows | arm64 | `RetroBeat-<version>-windows-arm64.zip` |
+
+Unpack the archive and run `retro_beat` (Linux) or `retro_beat.exe` (Windows).
+The Linux archives need `libmpv2` and `libsecret-1-0` installed (see above). On
+Linux x64 you can also install from the PPA (`sudo add-apt-repository
+ppa:dhiva-labs/apps && sudo apt install retrobeat`); the PPA package is amd64
+only.
+
+The [Desktop builds](.github/workflows/desktop.yml) workflow builds, tests and
+starts the Linux and Windows bundles on x64 and arm64 runners on every push, and
+attaches the archives to a published release.
+
+Windows arm64 ships an arm64 `libmpv-2.dll`, the audio-only build published by
+media-kit. `media_kit_libs_windows_audio` 1.0.9 on pub.dev only bundles an
+x86_64 one, so `pubspec.yaml` pins the unreleased 1.0.10 from media-kit's main
+branch until it is published.
 
 ## Architecture
 
