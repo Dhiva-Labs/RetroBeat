@@ -4,6 +4,34 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-10-16
+
+### Added
+- Linux arm64 and Windows arm64 builds, next to the existing x64 ones. Releases
+  now carry `RetroBeat-<version>-linux-x64.tar.gz`, `-linux-arm64.tar.gz`,
+  `-windows-x64.zip` and `-windows-arm64.zip`, built and started on a runner
+  of each architecture by the new Desktop builds workflow. The Windows arm64
+  zip bundles the arm64 `libmpv-2.dll`.
+- Releases are completed by CI: publishing a release attaches the four desktop
+  archives, leaving alone any file name already on the release.
+
+### Changed
+- `jni` is updated to 1.0.3, which compiles on Linux arm64.
+- Windows builds define `_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS`
+  so `permission_handler_windows` still compiles with Visual Studio 2026.
+- The PPA helper script gained a `--build-only` flag for headless machines.
+
+### Fixed
+- Launchpad PPA builds no longer fail in `dh_shlibdeps` on the pre-built bundle.
+
+## [1.1.1] - 2026-07-30
+
+### Fixed
+- Android build fixes needed for CI: namespace fallback for plugins with
+  embedded AGP 4.x build scripts, library subprojects aligned to JVM 17, and the
+  `compilerOptions` DSL in place of the removed `kotlinOptions`.
+- The PPA target is `ppa:dhiva-labs/apps`.
+
 ## [1.1.0] - 2026-07-30
 
 ### Added
