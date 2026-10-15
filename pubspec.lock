@@ -579,10 +579,10 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: "5bc9a9daac5ccfbd6a758377600b9f7fdce13d93f26e8012a8941014a5d978d1"
+      sha256: f038e58b4dc2c9037f50e233175086337e0b305e356d28211bf55f21c504cbd3
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   jni_flutter:
     dependency: transitive
     description:
@@ -722,11 +722,12 @@ packages:
   media_kit_libs_windows_audio:
     dependency: "direct main"
     description:
-      name: media_kit_libs_windows_audio
-      sha256: c2fd558cc87b9d89a801141fcdffe02e338a3b21a41a18fbd63d5b221a1b8e53
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.9"
+      path: "libs/windows/media_kit_libs_windows_audio"
+      ref: c533e446755f51cf53c7e57aea873f2aa5355f81
+      resolved-ref: c533e446755f51cf53c7e57aea873f2aa5355f81
+      url: "https://github.com/media-kit/media-kit.git"
+    source: git
+    version: "1.0.10"
   meta:
     dependency: transitive
     description:

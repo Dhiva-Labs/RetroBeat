@@ -74,3 +74,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# media_kit_libs_windows_audio 1.0.9 (the latest on pub.dev) bundles an x86_64
+# libmpv-2.dll only. The unreleased 1.0.10 on media-kit's main branch picks the
+# x86_64 or aarch64 libmpv from FLUTTER_TARGET_PLATFORM, which is what makes
+# Windows arm64 builds possible. Pinned to a commit; drop the override once
+# 1.0.10 is published to pub.dev.
+dependency_overrides:
+  media_kit_libs_windows_audio:
+    git:
+      url: https://github.com/media-kit/media-kit.git
+      ref: c533e446755f51cf53c7e57aea873f2aa5355f81
+      path: libs/windows/media_kit_libs_windows_audio
