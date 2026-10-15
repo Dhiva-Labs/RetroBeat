@@ -3,8 +3,9 @@ name: Desktop builds
 # Linux and Windows, x64 and arm64, built natively on a runner of each
 # architecture. Every leg runs the unit tests, checks the machine type of every
 # binary in the bundle, packages it and starts the packaged app once.
-# Published releases get the arm64 packages attached (the x64 ones are not
-# touched). ci.yml keeps covering analysis, Android and macOS.
+# A published release gets the packages attached; names that are already on
+# the release (hand-uploaded files) are left alone. ci.yml keeps covering
+# analysis, Android and macOS.
 
 on:
   push:
@@ -13,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing release tag to attach the arm64 packages to (leave empty to only build)
+        description: Existing release tag to attach the packages to (leave empty to only build)
         required: false
         default: ''
   release:
@@ -331,7 +332,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Release assets (arm64)
+    name: Release assets
     needs: [linux, windows]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -345,26 +346,38 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          pattern: '*-arm64'
+          pattern: '*-*'
           path: assets
           merge-multiple: true
 
-      - name: Select the arm64 release assets
+      - name: Select the release assets
         id: select
         run: |
           VERSION="${ASSET_VERSION#v}"
           if [ -z "$VERSION" ]; then
             VERSION="$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)"
           fi
-          FILES="assets/RetroBeat-${VERSION}-linux-arm64.tar.gz assets/RetroBeat-${VERSION}-windows-arm64.zip"
+          FILES=""
+          for arch in x64 arm64; do FILES="$FILES assets/RetroBeat-${VERSION}-linux-${arch}.tar.gz"; done
+          for arch in x64 arm64; do FILES="$FILES assets/RetroBeat-${VERSION}-windows-${arch}.zip"; done
           ls -l assets
           ls -l $FILES
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
 
+      # Names already on the release (hand-uploaded files) are kept as they are.
       - name: Upload to release ${{ github.event.release.tag_name || inputs.release_tag }}
         if: github.event_name == 'release' || inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
           FILES: ${{ steps.select.outputs.files }}
-        run: gh release upload "$TAG" $FILES --clobber --repo "$GITHUB_REPOSITORY"
+        run: |
+          existing="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          for f in $FILES; do
+            name="$(basename "$f")"
+            if grep -qxF "$name" <<< "$existing"; then
+              echo "skip $name (already on release $TAG)"
+            else
+              gh release upload "$TAG" "$f" --repo "$GITHUB_REPOSITORY"
+            fi
+          done

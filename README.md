@@ -138,21 +138,24 @@ kwallet.
 
 ### Downloads
 
-Releases carry the arm64 desktop builds as plain archives:
+Releases carry the desktop builds as plain archives:
 
-| Platform | Asset |
-|---|---|
-| Linux arm64 | `RetroBeat-<version>-linux-arm64.tar.gz` |
-| Windows arm64 | `RetroBeat-<version>-windows-arm64.zip` |
+| Platform | Architecture | Asset |
+|---|---|---|
+| Linux | x64 | `RetroBeat-<version>-linux-x64.tar.gz` |
+| Linux | arm64 | `RetroBeat-<version>-linux-arm64.tar.gz` |
+| Windows | x64 | `RetroBeat-<version>-windows-x64.zip` |
+| Windows | arm64 | `RetroBeat-<version>-windows-arm64.zip` |
 
 Unpack the archive and run `retro_beat` (Linux) or `retro_beat.exe` (Windows).
-Linux arm64 needs `libmpv2` and `libsecret-1-0` installed (see above). On Linux
-x64, install from the PPA (`sudo add-apt-repository ppa:dhiva-labs/apps && sudo
-apt install retrobeat`); the PPA package is amd64 only.
+The Linux archives need `libmpv2` and `libsecret-1-0` installed (see above). On
+Linux x64 you can also install from the PPA (`sudo add-apt-repository
+ppa:dhiva-labs/apps && sudo apt install retrobeat`); the PPA package is amd64
+only.
 
 The [Desktop builds](.github/workflows/desktop.yml) workflow builds, tests and
 starts the Linux and Windows bundles on x64 and arm64 runners on every push, and
-attaches the arm64 archives to a published release.
+attaches the archives to a published release.
 
 Windows arm64 ships an arm64 `libmpv-2.dll`, the audio-only build published by
 media-kit. `media_kit_libs_windows_audio` 1.0.9 on pub.dev only bundles an
