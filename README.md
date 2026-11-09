@@ -11,6 +11,8 @@ A local music player for Android, built with Flutter. It reads the music already
 on your device — there is no streaming, no account, and **no network access at
 all**.
 
+**Documentation:** step-by-step guides at [learn.dhivalabs.com](https://learn.dhivalabs.com/apps/retrobeat/): [install](https://learn.dhivalabs.com/apps/retrobeat/install) · [beginner guide](https://learn.dhivalabs.com/apps/retrobeat/getting-started) · [troubleshooting](https://learn.dhivalabs.com/apps/retrobeat/faq).
+
 The UI is One UI–inspired: a swipeable tab bar over your library, a persistent
 mini player, and a full player tinted by the current album art. The look is
 deliberately near-monochrome, with a single accent colour reserved for whatever
